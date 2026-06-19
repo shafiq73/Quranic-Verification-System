@@ -1,66 +1,55 @@
 import streamlit as st
 from diff_match_patch import diff_match_patch
+from gtts import gTTS
+import io
 
 # Page Configuration
-st.set_page_config(page_title="Quranic Tajweed Analyzer", page_icon="📖", layout="centered")
+st.set_page_config(page_title="Quranic Verification System", page_icon="📖", layout="centered")
 
-st.title("📖 AI Quranic Tajweed & Error Detection Engine")
-st.write("Professional Data Science Portfolio Prototype: Visual Correction & Phonetic Feedback System.")
+st.title("📖 AI Quranic Verification System")
+st.write("Is app mein audio on-the-spot generate hogi, isiliye yeh hamesha chalegi!")
 
-# Complete Surah Al-Fatiha Dataset with Pronunciation/Tajweed Guide
+# Complete Surah Al-Fatiha Dataset
 surah_fatiha = {
-    "Ayat 1": {
-        "text": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-        "guide": "Bismillahir Rahmanir Raheem: 'Haa' (ح) ko halaq ke darmiyan se wazeh nikalna hai."
-    },
-    "Ayat 2": {
-        "text": "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
-        "guide": "Alhamdu lillahi Rabbil 'Alameen: 'Ayn' (ع) ko halaq se nikalna hai, 'Alameen' parhein, 'Ghafooreen' ya 'Alameen' mein 'Alif' na bane."
-    },
-    "Ayat 3": {
-        "text": "الرَّحْمَٰنِ الرَّحِيمِ",
-        "guide": "Ar-Rahmanir-Raheem: Dono jagah 'Haa' (ح) ki aawaz ko narm aur saaf nikalna hai."
-    },
-    "Ayat 4": {
-        "text": "مَالِكِ يَوْمِ الدِّينِ",
-        "guide": "Maliki Yawmid-Deen: 'Deen' (د) ko narm parhein, 'Zeen' ya 'Deen' mein 'Daal' ki baje 'Taa' na bane."
-    },
-    "Ayat 5": {
-        "text": "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",
-        "guide": "Iyyaka Na'budu wa Iyyaka Nasta'een: 'Iyyaka' par Tashdeed (stress) dalna hai, aur 'Nasta'een' mein 'Ayn' wazeh ho."
-    },
-    "Ayat 6": {
-        "text": "اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ",
-        "guide": "Ihdinas-Siraatal-Mustaqeem: 'Saad' (ص) aur 'Toa' (ط) ko pur (mota) parhna hai, 'Mustaqeem' mein 'Qaaf' (ق) mota hoga."
-    },
-    "Ayat 7": {
-        "text": "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ",
-        "guide": "Siraatal-Lazeena An'amta 'Alayhim...: 'Lazeena' mein 'Zaal' narm, 'Maghdoobi' mein 'Zwaad' (ض) ko mota parhein, aur 'Daalleen' par 6 harakat lamba karein."
-    }
+    "Ayat 1": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+    "Ayat 2": "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
+    "Ayat 3": "الرَّحْمَٰنِ الرَّحِيمِ",
+    "Ayat 4": "مَالِكِ يَوْمِ الدِّينِ",
+    "Ayat 5": "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",
+    "Ayat 6": "اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ",
+    "Ayat 7": "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ"
 }
 
 # UI: Dropdown Selection
 selected_ayat = st.selectbox("Kaunsi Ayat ki tilawat check karni hai?", list(surah_fatiha.keys()))
+correct_text = surah_fatiha[selected_ayat]
 
-correct_text = surah_fatiha[selected_ayat]["text"]
-tajweed_guide = surah_fatiha[selected_ayat]["guide"]
-
-# Display Reference Text
+# Reference Text
 st.markdown("### 🟢 Reference Text (Sahi Text):")
 st.info(correct_text)
+
+# 🔥 AUDIO GENERATION LOGIC: Yeh audio player hamesha samne rahega aur chalega!
+try:
+    tts = gTTS(text=correct_text, lang='ar', slow=False)
+    fp = io.BytesIO()
+    tts.write_to_fp(fp)
+    fp.seek(0)
+    
+    st.markdown("### 🔊 Reference Audio:")
+    st.audio(fp, format='audio/mp3')
+    st.caption("Aap is play (▶️) button ko dba kar aawaz sun sakte hain.")
+except Exception as e:
+    st.warning("Audio generate karne mein thodi pareshani huiwi hai.")
 
 st.markdown("---")
 
 # Simulation Input Area
 st.subheader("🎤 Recitation Input Simulation")
-st.write("Testing ke liye neeche diye gaye box mein text ko badal kar galti test karein:")
-
-# Pre-defined mistakes for analytics demonstration
 default_user_text = correct_text
 if selected_ayat == "Ayat 2":
-    default_user_text = "الْحَمْدُ لِلَّهِ رَبِّ الْغَفُورِينَ"  # Mistake: Al-Ghafooreen instead of Al-Alameen
+    default_user_text = "الْحَمْدُ لِلَّهِ رَبِّ الْغَفُورِينَ"
 elif selected_ayat == "Ayat 4":
-    default_user_text = "مَالِكِ يَوْمِ الدُّنْيَا"  # Mistake: Ad-Dunya instead of Ad-Deen
+    default_user_text = "مَالِكِ يَوْمِ الدُّنْيَا"
 
 user_input_text = st.text_input("Aap ki recitation ka text:", value=default_user_text)
 
@@ -70,7 +59,7 @@ if st.button("Analyze Recitation"):
     c_text = correct_text.strip()
     
     if u_text == c_text:
-        st.success("🎉 MashaAllah! Aap ki tilawat text ke mutabiq bilkul sahi hai.")
+        st.success("🎉 MashaAllah! Aap ki tilawat bilkul sahi hai.")
     else:
         st.error("⚠️ Recitation Error Detected!")
         
@@ -89,15 +78,8 @@ if st.button("Analyze Recitation"):
             elif diff[0] == -1:  # Deletion / What it should have been
                 html_output += f"<span style='color: #00E676; font-weight: bold; font-size: 26px; background-color: #1A3322; padding: 2px 5px; border-radius: 3px;'>{diff[1]}</span> "
         
-        # Display Visual Dashboard
         st.markdown("### 🔍 Advanced Analytics Dashboard:")
-        st.write("Neeche Lal (Red) rang aap ki galti ko dikhata hai, aur Sabz (Green) rang sahi lafz ko wazeh karta hai:")
-        
         st.markdown(f"<div style='background-color: #111111; padding: 20px; border-radius: 8px; text-align: right; line-height: 2; border: 1px solid #333;'>{html_output}</div>", unsafe_allow_code=True)
-        
-        # Tajweed & Phonetic Pronunciation Guide
-        st.markdown("### 🎯 Tajweed & Pronunciation Guide:")
-        st.warning(tajweed_guide)
 
 st.markdown("---")
 st.caption("Developed by Shafiq Ahmed | Data Science & AI Portfolio Project")
