@@ -100,4 +100,10 @@ if st.button("Analyze Recitation"):
         st.warning(tajweed_guide)
 
 st.markdown("---")
-st.caption("Developed by Shafiq Ahmed | Data Science & AI
+st.caption("Developed by Shafiq Ahmed | Data Science & AI Portfolio Project")
+# Tajweed & Phonetic Pronunciation Guide
+        st.markdown("### 🎯 Tajweed & Pronunciation Guide:")
+        st.warning(tajweed_guide)
+
+st.markdown("---")
+st.caption("Developed by Shafiq Ahmed | Data Science & AI Portfolio Project")
