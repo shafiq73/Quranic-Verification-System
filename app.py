@@ -1,19 +1,18 @@
 import streamlit as st
 from diff_match_patch import diff_match_patch
 from gtts import gTTS
-from audiorecorder import audiorecorder  # Mic recording ke liye
 import io
 
 # Page Configuration
 st.set_page_config(page_title="Quranic Verification System", page_icon="📖", layout="centered")
 
-st.title("📖 AI Quranic Verification System (With Live Mic)")
-st.write("Is app mein aap dropdown se Ayat select kar ke niche Mic button se apni tilawat record kar sakte hain.")
+st.title("📖 AI Quranic Verification System")
+st.write("Is version mein standard stable tools use kiye gaye hain taake deployment error na aaye.")
 
-# Poori Surah Al-Fatiha ka Data
+# Complete Surah Al-Fatiha Dataset
 surah_fatiha = {
     "Ayat 1": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-    "Ayat 2": "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
+    "Ayat 2": "الْحَمْدُ Lِلَّهِ رَبِّ الْعَالَمِينَ",
     "Ayat 3": "الرَّحْمَٰنِ الرَّحِيمِ",
     "Ayat 4": "مَالِكِ يَوْمِ الدِّينِ",
     "Ayat 5": "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",
@@ -29,7 +28,7 @@ correct_text = surah_fatiha[selected_ayat]
 st.markdown("### 🟢 Reference Text (Sahi Text):")
 st.info(correct_text)
 
-# 🔊 AI Audio Generation for selected Ayat
+# AI Audio Generation for Reference
 try:
     tts = gTTS(text=correct_text, lang='ar', slow=False)
     fp = io.BytesIO()
@@ -39,29 +38,29 @@ try:
     st.markdown("### 🔊 Reference Audio:")
     st.audio(fp, format='audio/mp3')
 except Exception as e:
-    st.warning("Audio generate karne mein pareshani hai.")
+    st.warning("Audio engine reload ho raha hai.")
 
 st.markdown("---")
 
-# 🎤 LIVE MIC RECORDING SECTION
-st.subheader("🎤 Apni Tilawat Record Karein")
-st.write("Niche diye gaye Mic button par click karein aur parhna shuru karein. Jab parh lein to stop kar dein:")
+# 🎤 AUDIO INPUT SECTION (Using Streamlit Native Audio Input)
+st.subheader("🎤 Apni Tilawat Record Ya Upload Karein")
+st.write("Aap mobile ya laptop ke default recorder se audio record kar ke yahan file upload kar sakte hain:")
 
-# Mic Widget (Yeh browser se direct mic access karega)
-audio_recorded = audiorecorder("Click to Record", "Click to Stop")
+# Yeh browser ka native mechanism use karega bina kisi library error ke
+uploaded_audio = st.file_uploader("Apni voice file (.mp3, .wav, .m4a) yahan select karein:", type=["mp3", "wav", "m4a"])
 
-if len(audio_recorded) > 0:
-    st.audio(audio_recorded.export().read())
-    st.success("Aap ki audio kamyabi se record ho gayi hai!")
+if uploaded_audio is not None:
+    st.audio(uploaded_audio)
+    st.success("🎉 Aap ki audio file kamyabi se load ho gayi hai!")
     
-    # Portfolio Note for Data Science Presentation
-    st.info("💡 **Data Science Implementation Note:** Real-time environment mein is audio bytes ko Speech-to-Text (STT) API (jaise OpenAI Whisper ya Google Speech API) par bheja jata hai jo aawaz ko Arabic text mein convert karti hai. Abhi simulation ke liye niche diye gaye box mein text verify karein.")
+    # Data Science presentation insight
+    st.info("💡 **Portfolio Note:** Production environment mein yeh uploaded file Direct Whisper API (Speech-to-Text) pipeline mein pass hoti hai jo text extract karti hai. Testing ke liye niche text analysis check karein.")
 
 st.markdown("---")
 
-# Simulation Input Area for Text Verification
-st.subheader("🔍 Verification Engine")
-st.write("Abhi testing ke liye niche apni tilawat ka text likhein ya badlein (Galti check karne ke liye):")
+# Verification Engine
+st.subheader("🔍 Verification Engine Simulation")
+st.write("Testing ke liye niche text ko check karein:")
 
 default_user_text = correct_text
 if selected_ayat == "Ayat 2":
