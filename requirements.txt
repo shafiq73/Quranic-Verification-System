@@ -1,3 +1,8 @@
 streamlit
+streamlit-mic-recorder
+faster-whisper
 diff-match-patch
-gTTS
+pydub
+numpy
+av
+ctranslate2
