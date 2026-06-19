@@ -1,4 +1,3 @@
 streamlit
 diff-match-patch
 gTTS
-streamlit-audio-recorder
