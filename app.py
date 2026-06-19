@@ -7,73 +7,70 @@ import io
 st.set_page_config(page_title="Quranic Verification System", page_icon="📖", layout="centered")
 
 st.title("📖 AI Quranic Verification System")
-st.write("Is version mein standard stable tools use kiye gaye hain taake deployment error na aaye.")
+st.write("Is app mein poori Surah Al-Fatiha ki tilawat ek sath suni ja sakti hai.")
 
-# Complete Surah Al-Fatiha Dataset
-surah_fatiha = {
-    "Ayat 1": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-    "Ayat 2": "الْحَمْدُ Lِلَّهِ رَبِّ الْعَالَمِينَ",
-    "Ayat 3": "الرَّحْمَٰنِ الرَّحِيمِ",
-    "Ayat 4": "مَالِكِ يَوْمِ الدِّينِ",
-    "Ayat 5": "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",
-    "Ayat 6": "اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ",
-    "Ayat 7": "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ"
-}
+# Complete Surah Al-Fatiha Text (Ek sath jora hua taake gTTS poori surah parhay)
+complete_surah_text = (
+    "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ . "
+    "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ . "
+    "الرَّحْمَٰنِ الرَّحِيمِ . "
+    "مَالِكِ يَوْمِ الدِّينِ . "
+    "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ . "
+    "اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ . "
+    "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ"
+)
 
-# UI: Dropdown Selection
-selected_ayat = st.selectbox("Kaunsi Ayat ki tilawat check karni hai?", list(surah_fatiha.keys()))
-correct_text = surah_fatiha[selected_ayat]
+# Reference Text Display
+st.markdown("### 🟢 Reference Text (Poori Surah Al-Fatiha):")
+st.info(complete_surah_text)
 
-# Reference Text
-st.markdown("### 🟢 Reference Text (Sahi Text):")
-st.info(correct_text)
-
-# AI Audio Generation for Reference
-try:
-    tts = gTTS(text=correct_text, lang='ar', slow=False)
-    fp = io.BytesIO()
-    tts.write_to_fp(fp)
-    fp.seek(0)
-    
-    st.markdown("### 🔊 Reference Audio:")
-    st.audio(fp, format='audio/mp3')
-except Exception as e:
-    st.warning("Audio engine reload ho raha hai.")
+# 🔊 AI Audio Generation for the WHOLE Surah
+with st.spinner("Poori Surah ki audio generate ho rahi hai..."):
+    try:
+        # Lang='ar' rakha hai taake Arabic accent mein parhay
+        tts = gTTS(text=complete_surah_text, lang='ar', slow=False)
+        fp = io.BytesIO()
+        tts.write_to_fp(fp)
+        fp.seek(0)
+        
+        st.markdown("### 🔊 Complete Surah Audio (Play to listen full Surah):")
+        st.audio(fp, format='audio/mp3')
+    except Exception as e:
+        st.warning("Audio generate karne mein thoda masla aa raha hai, please page refresh karein.")
 
 st.markdown("---")
 
 # 🎤 AUDIO INPUT SECTION (Using Streamlit Native Audio Input)
 st.subheader("🎤 Apni Tilawat Record Ya Upload Karein")
-st.write("Aap mobile ya laptop ke default recorder se audio record kar ke yahan file upload kar sakte hain:")
+st.write("Aap mobile ya laptop ke recorder se apni aawaz record kar ke yahan file upload kar sakte hain:")
 
-# Yeh browser ka native mechanism use karega bina kisi library error ke
+# File uploader widget
 uploaded_audio = st.file_uploader("Apni voice file (.mp3, .wav, .m4a) yahan select karein:", type=["mp3", "wav", "m4a"])
 
 if uploaded_audio is not None:
     st.audio(uploaded_audio)
     st.success("🎉 Aap ki audio file kamyabi se load ho gayi hai!")
-    
-    # Data Science presentation insight
-    st.info("💡 **Portfolio Note:** Production environment mein yeh uploaded file Direct Whisper API (Speech-to-Text) pipeline mein pass hoti hai jo text extract karti hai. Testing ke liye niche text analysis check karein.")
 
 st.markdown("---")
 
-# Verification Engine
+# Verification Engine (Simulation)
 st.subheader("🔍 Verification Engine Simulation")
-st.write("Testing ke liye niche text ko check karein:")
+st.write("Galti check karne ke liye niche test text ko verify karein:")
 
-default_user_text = correct_text
-if selected_ayat == "Ayat 2":
-    default_user_text = "الْحَمْدُ لِلَّهِ رَبِّ الْغَفُورِينَ"
-elif selected_ayat == "Ayat 4":
-    default_user_text = "مَالِكِ يَوْمِ الدُّنْيَا"
+# Default input mein thodi galti daali hai testing ke liye
+default_user_text = (
+    "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ . "
+    "الْحَمْدُ لِلَّهِ رَبِّ الْغَفُورِينَ . "  # Galti: Al-Alameen ki jagah Al-Ghafooreen
+    "الرَّحْمَٰنِ الرَّحِيمِ . "
+    "مَالِكِ يَوْمِ الدُّنْيَا"  # Galti: Yawm id-Deen ki jagah Yawm id-Dunya
+)
 
-user_input_text = st.text_input("Aap ki recitation ka text input:", value=default_user_text)
+user_input_text = st.text_area("Aap ki recitation ka text input:", value=default_user_text, height=150)
 
 # Analysis Button
 if st.button("Verify Recitation"):
     u_text = user_input_text.strip()
-    c_text = correct_text.strip()
+    c_text = complete_surah_text.strip()
     
     if u_text == c_text:
         st.success("🎉 MashaAllah! Aap ki tilawat bilkul sahi hai.")
@@ -89,11 +86,11 @@ if st.button("Verify Recitation"):
         html_output = ""
         for diff in diffs:
             if diff[0] == 0:  # Match
-                html_output += f"<span style='color: #E0E0E0; font-size: 24px;'>{diff[1]} </span>"
+                html_output += f"<span style='color: #E0E0E0; font-size: 22px;'>{diff[1]} </span>"
             elif diff[0] == 1:  # User Error
-                html_output += f"<span style='color: #FF4B4B; font-weight: bold; font-size: 26px; text-decoration: line-through; background-color: #331A1A; padding: 2px 5px; border-radius: 3px;'>{diff[1]}</span> "
-            elif diff[0] == -1:  # Correct Text representation
-                html_output += f"<span style='color: #00E676; font-weight: bold; font-size: 26px; background-color: #1A3322; padding: 2px 5px; border-radius: 3px;'>{diff[1]}</span> "
+                html_output += f"<span style='color: #FF4B4B; font-weight: bold; font-size: 24px; text-decoration: line-through; background-color: #331A1A; padding: 2px 5px; border-radius: 3px;'>{diff[1]}</span> "
+            elif diff[0] == -1:  # What it should have been
+                html_output += f"<span style='color: #00E676; font-weight: bold; font-size: 24px; background-color: #1A3322; padding: 2px 5px; border-radius: 3px;'>{diff[1]}</span> "
         
         st.markdown("### 🔍 Advanced Analytics Dashboard:")
         st.markdown(f"<div style='background-color: #111111; padding: 20px; border-radius: 8px; text-align: right; line-height: 2; border: 1px solid #333;'>{html_output}</div>", unsafe_allow_code=True)
