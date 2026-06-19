@@ -1,15 +1,16 @@
 import streamlit as st
 from diff_match_patch import diff_match_patch
 from gtts import gTTS
+from audiorecorder import audiorecorder  # Mic recording ke liye
 import io
 
 # Page Configuration
 st.set_page_config(page_title="Quranic Verification System", page_icon="📖", layout="centered")
 
-st.title("📖 AI Quranic Verification System")
-st.write("Is app mein audio on-the-spot generate hogi, isiliye yeh hamesha chalegi!")
+st.title("📖 AI Quranic Verification System (With Live Mic)")
+st.write("Is app mein aap dropdown se Ayat select kar ke niche Mic button se apni tilawat record kar sakte hain.")
 
-# Complete Surah Al-Fatiha Dataset
+# Poori Surah Al-Fatiha ka Data
 surah_fatiha = {
     "Ayat 1": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
     "Ayat 2": "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
@@ -28,7 +29,7 @@ correct_text = surah_fatiha[selected_ayat]
 st.markdown("### 🟢 Reference Text (Sahi Text):")
 st.info(correct_text)
 
-# 🔥 AUDIO GENERATION LOGIC: Yeh audio player hamesha samne rahega aur chalega!
+# 🔊 AI Audio Generation for selected Ayat
 try:
     tts = gTTS(text=correct_text, lang='ar', slow=False)
     fp = io.BytesIO()
@@ -37,24 +38,41 @@ try:
     
     st.markdown("### 🔊 Reference Audio:")
     st.audio(fp, format='audio/mp3')
-    st.caption("Aap is play (▶️) button ko dba kar aawaz sun sakte hain.")
 except Exception as e:
-    st.warning("Audio generate karne mein thodi pareshani huiwi hai.")
+    st.warning("Audio generate karne mein pareshani hai.")
 
 st.markdown("---")
 
-# Simulation Input Area
-st.subheader("🎤 Recitation Input Simulation")
+# 🎤 LIVE MIC RECORDING SECTION
+st.subheader("🎤 Apni Tilawat Record Karein")
+st.write("Niche diye gaye Mic button par click karein aur parhna shuru karein. Jab parh lein to stop kar dein:")
+
+# Mic Widget (Yeh browser se direct mic access karega)
+audio_recorded = audiorecorder("Click to Record", "Click to Stop")
+
+if len(audio_recorded) > 0:
+    st.audio(audio_recorded.export().read())
+    st.success("Aap ki audio kamyabi se record ho gayi hai!")
+    
+    # Portfolio Note for Data Science Presentation
+    st.info("💡 **Data Science Implementation Note:** Real-time environment mein is audio bytes ko Speech-to-Text (STT) API (jaise OpenAI Whisper ya Google Speech API) par bheja jata hai jo aawaz ko Arabic text mein convert karti hai. Abhi simulation ke liye niche diye gaye box mein text verify karein.")
+
+st.markdown("---")
+
+# Simulation Input Area for Text Verification
+st.subheader("🔍 Verification Engine")
+st.write("Abhi testing ke liye niche apni tilawat ka text likhein ya badlein (Galti check karne ke liye):")
+
 default_user_text = correct_text
 if selected_ayat == "Ayat 2":
     default_user_text = "الْحَمْدُ لِلَّهِ رَبِّ الْغَفُورِينَ"
 elif selected_ayat == "Ayat 4":
     default_user_text = "مَالِكِ يَوْمِ الدُّنْيَا"
 
-user_input_text = st.text_input("Aap ki recitation ka text:", value=default_user_text)
+user_input_text = st.text_input("Aap ki recitation ka text input:", value=default_user_text)
 
 # Analysis Button
-if st.button("Analyze Recitation"):
+if st.button("Verify Recitation"):
     u_text = user_input_text.strip()
     c_text = correct_text.strip()
     
@@ -68,14 +86,14 @@ if st.button("Analyze Recitation"):
         diffs = dmp.diff_main(c_text, u_text)
         dmp.diff_cleanupSemantic(diffs)
         
-        # Generate Advanced Visual Feedback HTML
+        # Generate Visual Feedback HTML
         html_output = ""
         for diff in diffs:
             if diff[0] == 0:  # Match
                 html_output += f"<span style='color: #E0E0E0; font-size: 24px;'>{diff[1]} </span>"
-            elif diff[0] == 1:  # Insertion / User Error
+            elif diff[0] == 1:  # User Error
                 html_output += f"<span style='color: #FF4B4B; font-weight: bold; font-size: 26px; text-decoration: line-through; background-color: #331A1A; padding: 2px 5px; border-radius: 3px;'>{diff[1]}</span> "
-            elif diff[0] == -1:  # Deletion / What it should have been
+            elif diff[0] == -1:  # Correct Text representation
                 html_output += f"<span style='color: #00E676; font-weight: bold; font-size: 26px; background-color: #1A3322; padding: 2px 5px; border-radius: 3px;'>{diff[1]}</span> "
         
         st.markdown("### 🔍 Advanced Analytics Dashboard:")
