@@ -15,7 +15,7 @@ surah_fatiha = {
     },
     "Ayat 2": {
         "text": "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
-        "guide": "Alhamdu lillahi Rabbil 'Alameen: 'Ayn' (ع) ko halaq se nikalna hai, 'Alameen' parhein, 'Ghafooreen' ya 'Alameen' mein 'Alaf' na bne."
+        "guide": "Alhamdu lillahi Rabbil 'Alameen: 'Ayn' (ع) ko halaq se nikalna hai, 'Alameen' parhein, 'Ghafooreen' ya 'Alameen' mein 'Alif' na bane."
     },
     "Ayat 3": {
         "text": "الرَّحْمَٰنِ الرَّحِيمِ",
@@ -23,11 +23,11 @@ surah_fatiha = {
     },
     "Ayat 4": {
         "text": "مَالِكِ يَوْمِ الدِّينِ",
-        "guide": "Maliki Yawmid-Deen: 'Deen' (د) ko narm parhein, 'Zeen' ya 'Deen' mein 'Daal' ki baje 'Taa' na bne."
+        "guide": "Maliki Yawmid-Deen: 'Deen' (د) ko narm parhein, 'Zeen' ya 'Deen' mein 'Daal' ki baje 'Taa' na bane."
     },
     "Ayat 5": {
         "text": "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",
-        "guide": "Iyyaka Na'budu wa Iyyaka Nasta'een: 'Iyyaka' par Tashdeed (stress) dhalna hai, aur 'Nasta'een' mein 'Ayn' wazeh ho."
+        "guide": "Iyyaka Na'budu wa Iyyaka Nasta'een: 'Iyyaka' par Tashdeed (stress) dalna hai, aur 'Nasta'een' mein 'Ayn' wazeh ho."
     },
     "Ayat 6": {
         "text": "اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ",
@@ -35,7 +35,7 @@ surah_fatiha = {
     },
     "Ayat 7": {
         "text": "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ",
-        "guide": "Siraatal-Lazeena An'amta 'Alayhim...: 'Lazeena' mein 'Zaal' narm, 'Maghdoobi' mein 'Zwaad' (ض) ko mota parhein, aur 'Daallseen' par 6 harakat lamba karein."
+        "guide": "Siraatal-Lazeena An'amta 'Alayhim...: 'Lazeena' mein 'Zaal' narm, 'Maghdoobi' mein 'Zwaad' (ض) ko mota parhein, aur 'Daalleen' par 6 harakat lamba karein."
     }
 }
 
@@ -91,17 +91,11 @@ if st.button("Analyze Recitation"):
         
         # Display Visual Dashboard
         st.markdown("### 🔍 Advanced Analytics Dashboard:")
-        st.write("Neeche <span style='color: #FF4B4B; font-weight:bold;'>Lal (Red)</span> rang aap ki galti ko dikhata hai, aur <span style='color: #00E676; font-weight:bold;'>Sabz (Green)</span> rang sahi lafz ko wazeh karta hai:", unsafe_allow_code=True)
+        st.write("Neeche Lal (Red) rang aap ki galti ko dikhata hai, aur Sabz (Green) rang sahi lafz ko wazeh karta hai:")
         
         st.markdown(f"<div style='background-color: #111111; padding: 20px; border-radius: 8px; text-align: right; line-height: 2; border: 1px solid #333;'>{html_output}</div>", unsafe_allow_code=True)
         
         # Tajweed & Phonetic Pronunciation Guide
-        st.markdown("### 🎯 Tajweed & Pronunciation Guide:")
-        st.warning(tajweed_guide)
-
-st.markdown("---")
-st.caption("Developed by Shafiq Ahmed | Data Science & AI Portfolio Project")
-# Tajweed & Phonetic Pronunciation Guide
         st.markdown("### 🎯 Tajweed & Pronunciation Guide:")
         st.warning(tajweed_guide)
 
