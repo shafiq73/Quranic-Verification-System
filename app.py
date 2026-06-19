@@ -5,9 +5,9 @@ from diff_match_patch import diff_match_patch
 st.set_page_config(page_title="Quranic Recitation Checker", page_icon="📖", layout="centered")
 
 st.title("📖 Quranic Error Detection & Correction")
-st.write("اس ایپ میں سیو شدہ آڈیو ہمیشہ سامنے نظر آئے گی تاکہ آپ اسے سن سکیں۔")
+st.write("Is app mein galti hone par sahi tilawat ka text aur audio aap ke samne highlight ho jayegi.")
 
-# ہر آیت کا ٹیکسٹ اور انٹرنیٹ پر سیو شدہ آڈیو کا پکا لنک
+# Surah Al-Fatiha Data
 surah_fatiha = {
     "Ayat 1": {
         "text": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
@@ -39,59 +39,61 @@ surah_fatiha = {
     }
 }
 
-# 1. UI: Dropdown سے آیت سلیکٹ کریں
-selected_ayat = st.selectbox("کونسی آیت کی تلاوت چیک کرنی ہے؟", list(surah_fatiha.keys()))
+# UI: Dropdown
+selected_ayat = st.selectbox("Kaunsi Ayat ki tilawat check karni hai?", list(surah_fatiha.keys()))
 
 correct_text = surah_fatiha[selected_ayat]["text"]
 audio_link = surah_fatiha[selected_ayat]["audio_url"]
 
-# 2. ریفرنس ٹیکسٹ (صحیح طریقہ) جو سامنے سکرین پر دیکھے گا
-st.markdown("### 🟢 Reference Text (صحیح طریقہ):")
+# Reference Text (Sahi Tarika)
+st.markdown("### 🟢 Reference Text (Sahi Tarika):")
 st.info(correct_text)
 
-# 🔥 آپ کی ڈیمانڈ کے مطابق: یہ آڈیو پلیئر اب ہر وقت سکرین پر سامنے شو ہوگا!
-st.markdown("### 🔊 اس آیت کی سیو شدہ آڈیو (Reference Audio):")
+# Reference Audio Jo Hamesha Visible Hogi
+st.markdown("### 🔊 Saved Reference Audio:")
 st.audio(audio_link, start_time=0)
-st.caption("آپ مائیک کے بغیر بھی اس پلے بٹن کو دبا کر یہ آڈیو کسی بھی وقت سن سکتے ہیں۔")
+st.caption("Aap is play button par click kar ke saved audio kisi bhi waqt sun sakte hain.")
 
 st.markdown("---")
 
-# 3. Simulation Input (مائیک کا متبادل ٹیسٹنگ کے لیے)
+# Simulation Input
 st.subheader("🎤 Simulation & Testing")
-st.write("ابھی ٹیسٹنگ کے لیے نیچے والے باکس میں تلاوت کا ٹیکسٹ لکھیں۔ غلطی چیک کرنے کے لیے کوئی لفظ بدل دیں۔")
-
-# خود بخود غلطی والا ٹیکسٹ سیٹ کرنا ٹیسٹنگ کو آسان بنانے کے لیے
 default_user_text = correct_text
 if selected_ayat == "Ayat 2":
-    default_user_text = "الْحَمْدُ لِلَّهِ رَبِّ الْغَفُورِينَ"  # یہاں 'العالمين' کی جگہ 'الغفورين' لکھا ہے تاکہ گنتی پکڑی جائے
+    default_user_text = "الْحَمْدُ لِلَّهِ رَبِّ الْغَفُورِينَ"  # Galti ki hui hai testing ke liye
 elif selected_ayat == "Ayat 4":
-    default_user_text = "مَالِكِ يَوْمِ الدُّنْيَا"  # یہاں 'الدين' کی جگہ 'الدنيا' لکھا ہے
+    default_user_text = "مَالِكِ يَوْمِ الدُّنْيَا"
 
-user_input_text = st.text_input("آپ کی تلاوت کا ان پٹ (یہاں ٹیکسٹ ایڈٹ کریں):", value=default_user_text)
+user_input_text = st.text_input("Aap ki tilawat ka input:", value=default_user_text)
 
-# 4. ویریفیکیشن لاجک (بٹن دبانے پر)
+# Verification Button Logic
 if st.button("Verify My Recitation"):
     u_text = user_input_text.strip()
     c_text = correct_text.strip()
     
     if u_text == c_text:
-        st.success("🎉 ماشاءاللہ! آپ کی تلاوت بالکل صحیح ہے۔")
+        st.success("🎉 MashaAllah! Aap ki tilawat bilkul sahi hai.")
     else:
-        st.error("⚠️ تلاوت میں غلطی پکڑی گئی ہے!")
+        st.error("⚠️ Tilawat mein galti pakri gayi hai!")
         
-        # دونوں ٹیکسٹ کا موازنہ کرنا اور غلطی سامنے لانا
+        # Text Match logic aur HTML Formatting Lal (Red) color ke liye
         dmp = diff_match_patch()
         diffs = dmp.diff_main(c_text, u_text)
         dmp.diff_cleanupSemantic(diffs)
         
-        st.markdown("### 🔍 Correction Feedback:")
-        st.write("آپ کے لکھے ہوئے ٹیکسٹ اور صحیح ٹیکسٹ میں فرق ہے۔ تصحیح کے لیے اوپر دی گئی آڈیو کو دوبارہ غور سے سنیں۔")
+        # HTML Text Banana galti highlight karne ke liye
+        html_output = ""
+        for diff in diffs:
+            if diff[0] == 0:  # Sahi word
+                html_output += f"<span style='color: white; font-size: 24px;'>{diff[1]} </span>"
+            elif diff[0] == 1:  # Galt word jo user ne parha/likha
+                html_output += f"<span style='color: #ff4b4b; font-weight: bold; font-size: 28px; text-decoration: underline;'>{diff[1]}</span> "
         
-        # جیسے ہی بٹن دبے گا اور غلطی ہوگی، یہ آڈیو نیچے بھی خود بخود دوبارہ پلے ہونا شروع ہو جائے گی
-        st.audio(audio_link, start_time=0)
-        st.caption("🔊 غلطی کی وجہ سے صحیح تلاوت کی آڈیو خود بخود چل پڑی ہے۔")
-
-st.markdown("---")
-# پوری سورہ ایک ساتھ سننے کے لیے نیچے آپشن
-if st.checkbox("پوری سورہ فاتحہ ایک ساتھ سنیں"):
-    st.audio("https://audio.qurancdn.com/reciters/7/high.mp3")
+        # UI par Lal text show karna
+        st.markdown("### 🔍 Aap Ki Galti (Highlighted in Red):")
+        st.markdown(f"<div style='background-color: #1e1e1e; padding: 15px; border-radius: 5px; text-align: right;'>{html_output}</div>", unsafe_allow_code=True)
+        
+        # Correction Audio section ko alag se samne lana
+        st.markdown("### 🎯 Sahi Correction Audio:")
+        st.write("Browser policy ki wajah se auto-play block ho sakti hai. Meherbani kar ke niche diye gaye player ka **Play (▶️)** button dabayein aur sahi tilawat sunein:")
+        st.audio(audio_link)
