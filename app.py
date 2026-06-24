@@ -2,72 +2,72 @@ import streamlit as st
 import speech_recognition as sr
 import io
 
-st.set_page_config(page_title="Quranic Verification System", page_icon="📖", layout="centered")
+st.set_page_config(page_title="Quranic Real-Time Verification", page_icon="📖", layout="centered")
 
-st.title("📖 Quranic Verification System (Free AI)")
-st.write("### Real-Time Automatic Correction (No Error Setup)")
+st.title("📖 Quranic Automatic Word-Correction")
+st.write("### 🎙️ Lafzi Galti Par Qari Sahab Ka Auto-Start System")
 
-# Surah aur sahi text ka data
-quran_data = {
-    "1. Surah Al-Fatiha": {
-        "num": 1,
-        "correct_text": "الحمد لله رب العالمين"
-    },
-    "112. Surah Al-Ikhlas": {
-        "num": 112,
-        "correct_text": "قل هو الله أحد"
-    }
-}
+# Surah Al-Ikhlas ke har lafz ka exact sahi text aur us ka audio timing (seconds mein)
+# Taake Qari sahab sirf galti wale lafz se hi bolna shuru karein
+ikhlas_words = [
+    {"word": "قل", "start_time": 0, "end_time": 1},
+    {"word": "هو", "start_time": 1, "end_time": 2},
+    {"word": "الله", "start_time": 2, "end_time": 4},
+    {"word": "أحد", "start_time": 4, "end_time": 6}
+]
 
-selected_surah = st.selectbox("Surah Select Karein:", list(quran_data.keys()))
-base_url = "https://server6.mp3quran.net/kurdi/"
+correct_full_text = "قل هو الله أحد"
+qari_audio_url = "https://server6.mp3quran.net/kurdi/112.mp3"
 
-if selected_surah:
-    surah_info = quran_data[selected_surah]
-    file_number = f"{surah_info['num']:03d}"
-    qari_audio_url = f"{base_url}{file_number}.mp3"
+st.subheader("📖 Target Verses: Surah Al-Ikhlas")
+st.info(f"Sahi Lafz: **{correct_full_text}**")
+
+# Clean Arabic function to ignore basic spaces/diacritics
+def clean_word(w):
+    return "".join([c for c in w if c not in ["\u064b", "\u064c", "\u064d", "\u064e", "\u0650", "\u064f", "\u0651", "\u0652", " "]])
+
+st.write("---")
+st.write("### 🛠️ Step 1: Apni Tilawat Test Karein")
+recorded_file = st.audio_input("Mic daba kar parhein (Example: Galti check karne ke liye 'قل هو الله صمد' parh kar dekhein):")
+
+if recorded_file is not None:
+    audio_bytes = recorded_file.read()
+    recognizer = sr.Recognizer()
     
-    st.write("---")
-    st.subheader("🎵 Qari Sahab Ki Awaz (Reference)")
-    st.audio(qari_audio_url, format="audio/mp3")
-
-    st.write("---")
-    st.subheader("🎙️ Apni Awaz Mein Tilawat Karein")
-    
-    # Live Microphone Input
-    recorded_file = st.audio_input("Record karne ke liye mic icon par click karein:")
-
-    if recorded_file is not None:
-        with st.spinner("Free AI live check kar raha hai..."):
-            try:
-                # Direct file bytes ko read karna (No ffmpeg/ffprobe required)
-                audio_bytes = recorded_file.read()
+    with st.spinner("AI aap ke lafzoon ka muwazna (comparison) kar raha hai..."):
+        try:
+            with sr.AudioFile(io.BytesIO(audio_bytes)) as source:
+                audio_data = recognizer.record(source)
+                user_text = recognizer.recognize_google(audio_data, language="ar-AE")
+            
+            st.write(f"🗣️ **Aap ne parha:** {user_text}")
+            
+            user_words = user_text.split()
+            galti_mili = False
+            galti_wala_lafz = ""
+            jump_to_seconds = 0
+            
+            # Har lafz ko aik aik kar ke check karna ke galti kahan hui
+            for i, target in enumerate(ikhlas_words):
+                cleaned_target = clean_word(target["word"])
                 
-                # Speech Recognition ko direct audio stream dena
-                recognizer = sr.Recognizer()
-                with sr.AudioFile(io.BytesIO(audio_bytes)) as source:
-                    audio_data = recognizer.record(source)
-                    # Google Free Arabic recognition engine use karna
-                    user_text = recognizer.recognize_google(audio_data, language="ar-AE")
+                # Agar user ke lafz khatam ho gaye ya match nahi kiya
+                if i >= len(user_words) or clean_word(user_words[i]) != cleaned_target:
+                    galti_mili = True
+                    galti_wala_lafz = user_words[i] if i < len(user_words) else "Lafz Chora"
+                    jump_to_seconds = target["start_time"] # Galti ka exact waqt
+                    break
+            
+            if galti_mili:
+                st.error(f"⚠️ Lafzi Galti Mili! Aap ne '{galti_wala_lafz}' parha, jo ke galat hai.")
+                st.warning(f"🔄 Qari Sahab automatic correction ke liye exact **{jump_to_seconds} seconds** se parhna shuru kar rahe hain:")
                 
-                sahi_text = surah_info["correct_text"]
+                # Qari Sahab ki audio ko exact galti wale timestamp se play karna
+                st.audio(qari_audio_url, format="audio/mp3", start_time=jump_to_seconds, autoplay=True)
+            else:
+                st.success("🎉 MashaAllah! Aap ke saare alfaz bilkul darust hain. Qari sahab khamosh hain!")
                 
-                # Makhraj/Zabar-Zer filter logic
-                def clean_arabic(text):
-                    return "".join([c for c in text if c not in ["\u064b", "\u064c", "\u064d", "\u064e", "\u0650", "\u064f", "\u0651", "\u0652", " "]])
-
-                st.write(f"🗣️ **Aap ne parha:** {user_text}")
-                
-                # Comparison logic
-                if clean_arabic(user_text) != clean_arabic(sahi_text):
-                    st.error("⚠️ Lafzi Galti Detect Hui!")
-                    st.warning("🔄 Automatic Correction: Qari Sahab ki awaz suniye:")
-                    # User ke rokte hi Qari sahab ki audio autoplay ho jayegi
-                    st.audio(qari_audio_url, format="audio/mp3", autoplay=True)
-                else:
-                    st.success("🎉 MashaAllah! Aap ki tilawat bilkul theek hai. Koi lafzi galti nahi mili.")
-                    
-            except sr.UnknownValueError:
-                st.error("⚠️ AI aap ki awaz thik se samajh nahi saka. Koshish karein ke mic ke thora kareeb ho kar saaf parhein.")
-            except Exception as e:
-                st.error(f"Error: {e}")
+        except sr.UnknownValueError:
+            st.error("⚠️ AI awaz saaf nahi sun saka, dobara koshish karein.")
+        except Exception as e:
+            st.error(f"System Error: {e}")
