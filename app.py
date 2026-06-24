@@ -1,5 +1,4 @@
 import streamlit as st
-from st_audiorecorder import audiorecorder
 
 st.set_page_config(page_title="Quranic Verification System", page_icon="📖", layout="centered")
 
@@ -28,21 +27,15 @@ if selected_surah:
     st.subheader("🎵 Qari Sahab Ki Awaz (Reference)")
     st.audio(qari_audio_url, format="audio/mp3")
 
-    # 2. Live Recording Section
+    # 2. Live Recording Section (Streamlit Built-in Feature)
     st.write("---")
     st.subheader("🎙️ Apni Awaz Mein Tilawat Record Karein")
-    st.info("Niche bane Record button par click karein. Jab parh lein to Stop par click karein.")
     
-    # Stable and lightweight recording widget
-    recorded_audio = audiorecorder()
+    # Yeh official built-in mic input hai, is se koi installation error nahi aata
+    recorded_file = st.audio_input("Record karne ke liye mic icon par click karein:")
 
-    if recorded_audio is not None and len(recorded_audio) > 0:
-        # User ki recording ko play back karna
-        st.success("✅ Aap ki recording save ho gayi hai! Niche sunein:")
-        
-        # Audio raw bytes ko read karna
-        audio_bytes = recorded_audio.tobytes()
-        st.audio(audio_bytes, format="audio/wav")
+    if recorded_file is not None:
+        st.success("✅ Aap ki recording successfully save ho gayi hai!")
         
         # 3. Smart Verification Simulation (Galti Check)
         st.write("---")
