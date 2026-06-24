@@ -1,16 +1,12 @@
 import streamlit as st
-from openai import OpenAI
+import speech_recognition as sr
+from pydub import AudioSegment
+import io
 
 st.set_page_config(page_title="Quranic Verification System", page_icon="📖", layout="centered")
 
-st.title("📖 Quranic Verification System (Live Fix)")
-st.write("### Real-Time Automatic Correction")
-
-# OpenAI Client Setup
-try:
-    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-except Exception as e:
-    st.error("⚠️ Secrets mein OPENAI_API_KEY check karein.")
+st.title("📖 Quranic Verification System (Free AI)")
+st.write("### Real-Time Automatic Correction (No API Key Needed)")
 
 # Surah aur sahi text ka data
 quran_data = {
@@ -39,40 +35,41 @@ if selected_surah:
     st.write("---")
     st.subheader("🎙️ Apni Awaz Mein Tilawat Karein")
     
-    # Live Microphone Input
     recorded_file = st.audio_input("Record karein, rokte hi automatic check hoga:")
 
-    # Jaise hi user recording stop karega, yeh niche wala code KHUD chal parega (bina button ke)
     if recorded_file is not None:
-        with st.spinner("AI live check kar raha hai..."):
+        with st.spinner("Free AI live check kar raha hai..."):
             try:
-                # Whisper AI se text lena
-                transcription = client.audio.transcriptions.create(
-                    model="whisper-1", 
-                    file=recorded_file,
-                    language="ar"
-                )
+                # Audio file ko WAV format mein convert karna jo Google AI samajhta hai
+                audio_bytes = recorded_file.read()
+                audio_segment = AudioSegment.from_file(io.BytesIO(audio_bytes))
+                wav_io = io.BytesIO()
+                audio_segment.export(wav_io, format="wav")
+                wav_io.seek(0)
                 
-                user_text = transcription.text.strip()
+                # Google Speech Recognition Setup
+                recognizer = sr.Recognizer()
+                with sr.AudioFile(wav_io) as source:
+                    audio_data = recognizer.record(source)
+                    # Arabic language select ki hai
+                    user_text = recognizer.recognize_google(audio_data, language="ar-AE")
+                
                 sahi_text = surah_info["correct_text"]
                 
-                # 🛠️ Makhraj ki galti khatam karne ke liye narm checking (Clean Text)
-                # Hum i'raab (zer, zabar, pesh) aur extra spaces ko ignore kar rahe hain
+                # Makhraj filter logic
                 def clean_arabic(text):
-                    # Khali spaces aur aam tabdeeli ko saaf karna
                     return "".join([c for c in text if c not in ["\u064b", "\u064c", "\u064d", "\u064e", "\u0650", "\u064f", "\u0651", "\u0652", " "]])
 
                 st.write(f"🗣️ **Aap ne parha:** {user_text}")
                 
-                # Agar saaf karne ke baad bhi lafz bilkul farq hain (Galat Lafz)
                 if clean_arabic(user_text) != clean_arabic(sahi_text):
                     st.error("⚠️ Lafzi Galti Detect Hui!")
                     st.warning("🔄 Automatic Correction: Qari Sahab ki awaz suniye:")
-                    
-                    # Live user ke rokte hi Qari sahab ki audio automatic chal paregi
                     st.audio(qari_audio_url, format="audio/mp3", autoplay=True)
                 else:
                     st.success("🎉 MashaAllah! Aap ki tilawat bilkul theek hai.")
                     
+            except sr.UnknownValueError:
+                st.error("⚠️ AI aap ki awaz samajh nahi saka. Koshish karein ke mic ke kareeb ho kar saaf parhein.")
             except Exception as e:
                 st.error(f"Error: {e}")
