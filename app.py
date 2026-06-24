@@ -1,5 +1,5 @@
 import streamlit as st
-from audiorecorder import audiorecorder
+from st_audiorecorder import audiorecorder
 
 st.set_page_config(page_title="Quranic Verification System", page_icon="📖", layout="centered")
 
@@ -31,34 +31,34 @@ if selected_surah:
     # 2. Live Recording Section
     st.write("---")
     st.subheader("🎙️ Apni Awaz Mein Tilawat Record Karein")
-    st.info("Niche record button par click karein aur parhna shuru karein. Jab mukammal ho jaye to stop karein.")
+    st.info("Niche bane Record button par click karein. Jab parh lein to Stop par click karein.")
     
-    # Custom recording widget
-    recorded_audio = audiorecorder("🔴 Record Shuru Karein", "⏹️ Recording Stop Karein")
+    # Stable and lightweight recording widget
+    recorded_audio = audiorecorder()
 
-    if len(recorded_audio) > 0:
+    if recorded_audio is not None and len(recorded_audio) > 0:
         # User ki recording ko play back karna
         st.success("✅ Aap ki recording save ho gayi hai! Niche sunein:")
-        st.audio(recorded_audio.export().read(), format="audio/wav")
+        
+        # Audio raw bytes ko read karna
+        audio_bytes = recorded_audio.tobytes()
+        st.audio(audio_bytes, format="audio/wav")
         
         # 3. Smart Verification Simulation (Galti Check)
         st.write("---")
         st.subheader("🤖 AI Verification Status")
         
-        # Abhi ke liye hum ek Smart Check Button bana rahe hain
-        # Agle step mein hum isko real Whisper AI model se connect karenge
         if st.button("🔍 Tilawat Verify Karein"):
             with st.spinner("Aap ki awaz ka Qari sahab ki tilawat se muwazna (compare) kiya ja raha hai..."):
                 
-                # Yeh sirf temporary testing simulate karne ke liye hai
-                # Farz karein user se galti hui:
+                # Simulation: Farz karein galti hui
                 galti_detect_hui = True 
                 
                 if galti_detect_hui:
                     st.error("⚠️ Galti Detect Hui! Aap ki tilawat mein makhraj ya lafzi galti hai.")
-                    st.warning("🔄 AI Correction: App ab automatic Qari Sahab ki awaz wahin se play kar rahi hai taake aap sahi sun sakein.")
+                    st.warning("🔄 AI Correction: App ab automatic Qari Sahab ki awaz shuru se play kar rahi hai taake aap sahi sun sakein.")
                     
-                    # Automatic Qari sahab ki audio dobara trigger karna
-                    st.audio(qari_audio_url, format="audio/mp3", start_time=0) # start_time ko galti ke mutabiq adjust kiya ja sakta hai
+                    # Automatic Qari sahab ki audio dobara chalana
+                    st.audio(qari_audio_url, format="audio/mp3")
                 else:
                     st.success("🎉 MashaAllah! Aap ki tilawat bilkul theek hai.")
