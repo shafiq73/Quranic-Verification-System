@@ -1,12 +1,11 @@
 import streamlit as st
 import speech_recognition as sr
-from pydub import AudioSegment
 import io
 
 st.set_page_config(page_title="Quranic Verification System", page_icon="📖", layout="centered")
 
 st.title("📖 Quranic Verification System (Free AI)")
-st.write("### Real-Time Automatic Correction (No API Key Needed)")
+st.write("### Real-Time Automatic Correction (No Error Setup)")
 
 # Surah aur sahi text ka data
 quran_data = {
@@ -35,41 +34,40 @@ if selected_surah:
     st.write("---")
     st.subheader("🎙️ Apni Awaz Mein Tilawat Karein")
     
-    recorded_file = st.audio_input("Record karein, rokte hi automatic check hoga:")
+    # Live Microphone Input
+    recorded_file = st.audio_input("Record karne ke liye mic icon par click karein:")
 
     if recorded_file is not None:
         with st.spinner("Free AI live check kar raha hai..."):
             try:
-                # Audio file ko WAV format mein convert karna jo Google AI samajhta hai
+                # Direct file bytes ko read karna (No ffmpeg/ffprobe required)
                 audio_bytes = recorded_file.read()
-                audio_segment = AudioSegment.from_file(io.BytesIO(audio_bytes))
-                wav_io = io.BytesIO()
-                audio_segment.export(wav_io, format="wav")
-                wav_io.seek(0)
                 
-                # Google Speech Recognition Setup
+                # Speech Recognition ko direct audio stream dena
                 recognizer = sr.Recognizer()
-                with sr.AudioFile(wav_io) as source:
+                with sr.AudioFile(io.BytesIO(audio_bytes)) as source:
                     audio_data = recognizer.record(source)
-                    # Arabic language select ki hai
+                    # Google Free Arabic recognition engine use karna
                     user_text = recognizer.recognize_google(audio_data, language="ar-AE")
                 
                 sahi_text = surah_info["correct_text"]
                 
-                # Makhraj filter logic
+                # Makhraj/Zabar-Zer filter logic
                 def clean_arabic(text):
                     return "".join([c for c in text if c not in ["\u064b", "\u064c", "\u064d", "\u064e", "\u0650", "\u064f", "\u0651", "\u0652", " "]])
 
                 st.write(f"🗣️ **Aap ne parha:** {user_text}")
                 
+                # Comparison logic
                 if clean_arabic(user_text) != clean_arabic(sahi_text):
                     st.error("⚠️ Lafzi Galti Detect Hui!")
                     st.warning("🔄 Automatic Correction: Qari Sahab ki awaz suniye:")
+                    # User ke rokte hi Qari sahab ki audio autoplay ho jayegi
                     st.audio(qari_audio_url, format="audio/mp3", autoplay=True)
                 else:
-                    st.success("🎉 MashaAllah! Aap ki tilawat bilkul theek hai.")
+                    st.success("🎉 MashaAllah! Aap ki tilawat bilkul theek hai. Koi lafzi galti nahi mili.")
                     
             except sr.UnknownValueError:
-                st.error("⚠️ AI aap ki awaz samajh nahi saka. Koshish karein ke mic ke kareeb ho kar saaf parhein.")
+                st.error("⚠️ AI aap ki awaz thik se samajh nahi saka. Koshish karein ke mic ke thora kareeb ho kar saaf parhein.")
             except Exception as e:
                 st.error(f"Error: {e}")
