@@ -1,8 +1,1 @@
 streamlit
-librosa
-numpy
-scipy
-soundfile
-requests
-matplotlib
-nltk
